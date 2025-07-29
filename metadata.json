@@ -1,0 +1,6 @@
+{
+  "name": "Deposition Testimony Analyzer",
+  "description": "An instructional tool that uses AI to analyze deposition testimony. Enter a paragraph of testimony, and the app will generate a mind map assessing its veracity, identifying key claims, potential inconsistencies, and areas for cross-examination.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
