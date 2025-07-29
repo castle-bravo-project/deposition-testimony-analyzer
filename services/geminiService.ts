@@ -190,7 +190,7 @@ function getAIInstance(): GoogleGenAI {
   } catch(error) {
     console.error("Error during fact check:", error);
     const message = error instanceof Error ? error.message : "An unexpected error occurred during the fact check.";
-    return { summary: `Fact check failed: ${message}`, sources: [] } as GroundingData;
+    return { summary: `Fact check failed: ${message}`, sources: [] };
   }
 }
 
