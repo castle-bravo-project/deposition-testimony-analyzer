@@ -5,7 +5,22 @@ if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable not set");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+function getUserApiKey(): string | undefined {
+  if (typeof window !== 'undefined') {
+    const key = localStorage.getItem('gemini_api_key');
+    if (key && key.trim()) return key.trim();
+  }
+  return process.env.API_KEY;
+}
+
+function getAIInstance(): GoogleGenAI {
+  const apiKey = getUserApiKey();
+  if (!apiKey) {
+    throw new Error("Google Gemini API key not set. Please provide your API key in the sidebar settings.");
+  }
+  return new GoogleGenAI({ apiKey });
+}
 
 const getStreamingPrompt = (testimony: string) => `
 You are an AI legal analyst powering an interactive mind-mapping tool. The user has provided a deposition testimony and your task is to analyze it.
@@ -61,6 +76,7 @@ Begin streaming the raw ndjson output now, starting with the root node.
 
 export async function* analyzeTestimonyStream(testimony: string): AsyncGenerator<FlatAnalysisNode> {
   try {
+    const ai = getAIInstance();
     const responseStream = await ai.models.generateContentStream({
       model: "gemini-2.5-flash",
       contents: getStreamingPrompt(testimony),
@@ -131,6 +147,7 @@ export async function getAlternativePerspective(nodeTitle: string, nodeContent: 
     `;
     
   try {
+    const ai = getAIInstance();
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
@@ -150,23 +167,13 @@ export async function getAlternativePerspective(nodeTitle: string, nodeContent: 
 }
 
 export async function factCheckClaim(claimTitle: string, claimContent: string): Promise<GroundingData> {
-  const prompt = `Please act as a neutral fact-checker. Use Google Search to find information about the following claim and provide a brief summary of your findings based ONLY on the search results.
-Claim: "${claimTitle}: ${claimContent}"
-function getUserApiKey(): string | undefined {
-  if (typeof window !== 'undefined') {
-    const key = localStorage.getItem('gemini_api_key');
-    if (key && key.trim()) return key.trim();
-  }
-  return process.env.API_KEY;
-}
+  const prompt = `Please act as a neutral fact-checker. Use Google Search to find information about the following claim and provide a brief summary of your findings based ONLY on the search results.\n\nClaim: "${claimTitle}: ${claimContent}"\n\nProvide a concise summary of what you found, including whether the claim appears to be supported, contradicted, or cannot be verified based on available information.`;
 
-function getAIInstance(): GoogleGenAI {
-  const apiKey = getUserApiKey();
-  if (!apiKey) {
-    throw new Error("Google Gemini API key not set. Please provide your API key in the sidebar settings.");
-  }
-  return new GoogleGenAI({ apiKey });
-}
+  try {
+    const ai = getAIInstance();
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
       config: {
         tools: [{googleSearch: {}}],
       },
@@ -200,7 +207,6 @@ export async function generateMotionDocument(
     counterArgument?: string, 
     factCheck?: string
 ): Promise<string> {
-  
   const ai = getAIInstance();
   let prompt = `
     You are an expert legal assistant AI. Your task is to draft a formal, high-quality legal motion. The motion should be well-structured, professional, and ready for a lawyer to review and file.\n\n    **Motion Details:**\n    - **Type of Motion:** ${motionType}\n    - **Primary Justification:** ${justification}
