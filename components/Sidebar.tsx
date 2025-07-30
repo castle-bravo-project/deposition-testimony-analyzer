@@ -210,6 +210,11 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
       </div>
+
+      {/* Gemini API Key Manager always visible at the bottom */}
+      <div className="p-4 border-t border-slate-300 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-900">
+        <ApiKeyManager />
+      </div>
     </aside>
   );
 };
