@@ -90,8 +90,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside className="w-[450px] flex-shrink-0 bg-slate-100 dark:bg-slate-800 h-full flex flex-col shadow-2xl z-10">
       <Header theme={theme} onToggle={onThemeToggle} />
+      {/* Gemini API Key Manager always visible at the top */}
+      <div className="p-4 border-b border-slate-300 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-900">
+        <ApiKeyManager />
+      </div>
       <div className="p-6 flex-grow overflow-y-auto space-y-6">
-        
         <FileUpload 
             file={documentFile}
             onFileChange={onFileChange}
@@ -211,10 +214,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* Gemini API Key Manager always visible at the bottom */}
-      <div className="p-4 border-t border-slate-300 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-900">
-        <ApiKeyManager />
-      </div>
+      {/* Removed bottom ApiKeyManager, now at top */}
     </aside>
   );
 };
