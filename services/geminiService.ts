@@ -1,9 +1,6 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import type { AnalysisNode, FlatAnalysisNode, GroundingData, GroundingSource } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
-}
 
 
 function getUserApiKey(): string | undefined {
@@ -11,7 +8,9 @@ function getUserApiKey(): string | undefined {
     const key = localStorage.getItem('gemini_api_key');
     if (key && key.trim()) return key.trim();
   }
-  return process.env.API_KEY;
+  // Optionally, fallback to a build-time env variable for dev only
+  // @ts-ignore
+  return typeof process !== 'undefined' && process.env && process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY : undefined;
 }
 
 function getAIInstance(): GoogleGenAI {
